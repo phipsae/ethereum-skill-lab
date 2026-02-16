@@ -40,3 +40,15 @@ cd ethereum-skill-lab
 ```
 
 Reports land in `test-runs/builds/<project-id>/reviewer-report.md`.
+
+## What the Test Loop Does (and Doesn't)
+
+The pipeline spins up a local Anvil fork of mainnet and tests **phases 1–4** end-to-end:
+
+- **Contracts** — Solidity compiles, Foundry tests pass
+- **Testing** — test coverage for edge cases, access control, reentrancy
+- **Security** — audit patterns applied correctly
+- **Frontend** — Next.js + wagmi app builds successfully
+- **Anvil deploy** — contracts deploy to the local fork
+
+**Not tested:** real deployment to Sepolia/mainnet/L2s, Etherscan verification, frontend deploy to Vercel/IPFS, and ENS setup. These require real credentials and cost real ETH, so they're covered by the skill's Phase 5 instructions but not validated by the automated pipeline.
