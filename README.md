@@ -52,3 +52,52 @@ The pipeline spins up a local Anvil fork of mainnet and tests **phases 1–4** e
 - **Anvil deploy** — contracts deploy to the local fork
 
 **Not tested:** real deployment to Sepolia/mainnet/L2s, Etherscan verification, frontend deploy to Vercel/IPFS, and ENS setup. These require real credentials and cost real ETH, so they're covered by the skill's Phase 5 instructions but not validated by the automated pipeline.
+
+## The Improvement Loop
+
+The pipeline isn't just a one-shot test — it's a feedback loop for improving the skill.
+
+### How it works
+
+```
+┌─────────────────────────────────────────────────────┐
+│  1. Run pipeline        ./test-runs/run.sh <project> │
+│                              │                       │
+│  2. Builder agent            ▼                       │
+│     Follows the skill    Hits a gap or               │
+│     literally            unclear instruction          │
+│                              │                       │
+│  3. Builder reports it       ▼                       │
+│     as BLOCKER / MAJOR / builder-report.md           │
+│     MINOR / SUGGESTION       │                       │
+│                              ▼                       │
+│  4. Reviewer agent       Reads builder report +      │
+│                          runs forge/npm builds       │
+│                              │                       │
+│  5. Reviewer writes          ▼                       │
+│     consolidated         reviewer-report.md          │
+│     ranked report        (prioritized fixes)         │
+│                              │                       │
+│  6. Human/agent reads        ▼                       │
+│     report, edits        skill files updated         │
+│     the skill                │                       │
+│                              ▼                       │
+│  7. Re-run same project  Confirm fixes work          │
+│                              │                       │
+│  8. Move to next project     ▼                       │
+│                          Repeat                      │
+└─────────────────────────────────────────────────────┘
+```
+
+### Severity levels
+
+The builder agent categorizes every issue it encounters:
+
+| Level | Meaning |
+|-------|---------|
+| **BLOCKER** | Can't continue — skill instruction is wrong or missing |
+| **MAJOR** | Built something, but had to guess or deviate from the skill |
+| **MINOR** | Cosmetic or unclear wording, didn't affect the build |
+| **SUGGESTION** | Nice-to-have improvement |
+
+The reviewer merges these with its own findings (compile errors, test failures, frontend build issues) into a single ranked list of recommendations. You fix from the top down.
