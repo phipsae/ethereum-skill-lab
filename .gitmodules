@@ -1,0 +1,3 @@
+[submodule "ethereum-building-skill"]
+	path = ethereum-building-skill
+	url = https://github.com/phipsae/ethereum-building-skills.git
