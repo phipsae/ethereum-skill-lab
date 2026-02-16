@@ -29,8 +29,8 @@ Validates the skill by having AI agents build real projects and review the resul
 
 ```bash
 # Clone with submodule
-git clone --recurse-submodules https://github.com/phipsae/ethereum-skills.git
-cd ethereum-skills
+git clone --recurse-submodules https://github.com/phipsae/ethereum-skill-lab.git
+cd ethereum-skill-lab
 
 # Prerequisites: forge, anvil, node, npm, claude (Claude Code CLI), jq
 # Optional env vars: FORK_RPC, MODEL (default: sonnet), BUILDER_MAX_BUDGET, REVIEWER_MAX_BUDGET
