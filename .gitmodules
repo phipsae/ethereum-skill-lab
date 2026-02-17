@@ -1,3 +1,4 @@
-[submodule "ethereum-building-skill"]
-	path = ethereum-building-skill
-	url = https://github.com/phipsae/ethereum-building-skills.git
+[submodule "ethskills"]
+	path = ethskills
+	url = https://github.com/phipsae/ethskills.git
+	branch = refactor-skill-catalogue-add-ship-testing-indexing
