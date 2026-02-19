@@ -50,20 +50,26 @@ done
 log "Projects: ${PROJECT_IDS[*]} | Model: $MODEL"
 
 # ─── Start Anvil ──────────────────────────────────────────────────────────────
-log "Starting Anvil (fork: $FORK_RPC)..."
-anvil --fork-url "$FORK_RPC" --port "$ANVIL_PORT" --silent &
-ANVIL_PID=$!
+if cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" &>/dev/null; then
+  BLOCK=$(cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" 2>/dev/null)
+  log "Reusing existing Anvil at block $BLOCK"
+  ANVIL_PID=""
+else
+  log "Starting Anvil (fork: $FORK_RPC)..."
+  anvil --fork-url "$FORK_RPC" --port "$ANVIL_PORT" --silent &
+  ANVIL_PID=$!
 
-# Wait for Anvil to be ready (up to 30s)
-for i in $(seq 1 30); do
-  if cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" &>/dev/null; then
-    BLOCK=$(cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" 2>/dev/null)
-    log "Anvil ready at block $BLOCK (PID $ANVIL_PID)"
-    break
-  fi
-  [[ $i -eq 30 ]] && die "Anvil failed to start after 30s"
-  sleep 1
-done
+  # Wait for Anvil to be ready (up to 30s)
+  for i in $(seq 1 30); do
+    if cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" &>/dev/null; then
+      BLOCK=$(cast block-number --rpc-url "http://127.0.0.1:$ANVIL_PORT" 2>/dev/null)
+      log "Anvil ready at block $BLOCK (PID $ANVIL_PID)"
+      break
+    fi
+    [[ $i -eq 30 ]] && die "Anvil failed to start after 30s"
+    sleep 1
+  done
+fi
 
 mkdir -p "$REPORTS_DIR"
 
