@@ -12,11 +12,11 @@ BASE_DIR="$SCRIPT_DIR"
 PROMPTS_DIR="$BASE_DIR/prompts"
 REPORTS_DIR="$BASE_DIR/reports"
 ANVIL_PID=""
-FORK_RPC="${FORK_RPC:-https://eth.merkle.io}"
+FORK_RPC="${FORK_RPC:-https://mainnet.rpc.buidlguidl.com}"
 ANVIL_PORT=8545
 MODEL="${MODEL:-sonnet}"
-BUILDER_MAX_BUDGET="${BUILDER_MAX_BUDGET:-3.00}"
-REVIEWER_MAX_BUDGET="${REVIEWER_MAX_BUDGET:-1.00}"
+BUILDER_MAX_BUDGET="${BUILDER_MAX_BUDGET:-15.00}"
+REVIEWER_MAX_BUDGET="${REVIEWER_MAX_BUDGET:-5.00}"
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 log()  { printf "\033[1;34m[pipeline]\033[0m %s\n" "$*"; }
