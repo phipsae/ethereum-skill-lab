@@ -189,6 +189,61 @@ EOF
     } > "$BUILD_DIR/reviewer-report.md"
   fi
 
+  # ─── E2E Tests ──────────────────────────────────────────────────────────────
+  E2E_STATUS="SKIPPED"
+  E2E_PASS=0
+  E2E_FAIL=0
+
+  if ls "$PROJECT_DIR"/packages/nextjs/e2e/*.spec.ts &>/dev/null; then
+    log "[$PROJECT_ID] Running Playwright E2E tests..."
+
+    # Kill any lingering process on port 3000
+    lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+
+    # Start dev server (& outside subshell so $! captures the PID)
+    (cd "$PROJECT_DIR" && exec yarn start) &>/dev/null &
+    DEV_SERVER_PID=$!
+
+    # Wait for server ready (up to 30s)
+    SERVER_READY=false
+    for i in $(seq 1 30); do
+      if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null | grep -q "200"; then
+        SERVER_READY=true
+        break
+      fi
+      sleep 1
+    done
+
+    if $SERVER_READY; then
+      # Run Playwright tests
+      (cd "$PROJECT_DIR/packages/nextjs" && npx playwright test --reporter=list) \
+        > "$BUILD_DIR/e2e-results.txt" 2>&1
+      E2E_EXIT=$?
+
+      if [[ $E2E_EXIT -eq 0 ]]; then
+        E2E_STATUS="PASS"
+      else
+        E2E_STATUS="FAIL"
+      fi
+
+      # Parse pass/fail counts from Playwright output
+      E2E_PASS=$(grep -c "✓\|✔\| passed" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || echo "0")
+      E2E_FAIL=$(grep -c "✗\|✘\| failed" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || echo "0")
+    else
+      E2E_STATUS="SERVER_FAILED"
+      echo "Dev server failed to start within 30s" > "$BUILD_DIR/e2e-results.txt"
+    fi
+
+    # Kill dev server
+    kill "$DEV_SERVER_PID" 2>/dev/null || true
+    wait "$DEV_SERVER_PID" 2>/dev/null || true
+    lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+
+    log "[$PROJECT_ID] E2E tests: $E2E_STATUS (pass=$E2E_PASS fail=$E2E_FAIL)"
+  else
+    log "[$PROJECT_ID] No Playwright tests found — skipping E2E"
+  fi
+
   # ─── Metadata ───────────────────────────────────────────────────────────────
   RUN_END=$(ts)
 
@@ -203,13 +258,17 @@ EOF
     --arg reviewer_start "$REVIEWER_START" \
     --arg reviewer_end "$REVIEWER_END" \
     --argjson reviewer_exit "$REVIEWER_EXIT" \
+    --arg e2e_status "$E2E_STATUS" \
+    --argjson e2e_pass "$E2E_PASS" \
+    --argjson e2e_fail "$E2E_FAIL" \
     '{
       project: $project,
       model: $model,
       run_start: $run_start,
       run_end: $run_end,
       builder: { start: $builder_start, end: $builder_end, exit_code: $builder_exit },
-      reviewer: { start: $reviewer_start, end: $reviewer_end, exit_code: $reviewer_exit }
+      reviewer: { start: $reviewer_start, end: $reviewer_end, exit_code: $reviewer_exit },
+      e2e: { status: $e2e_status, passed: $e2e_pass, failed: $e2e_fail }
     }' > "$BUILD_DIR/run-meta.json"
 
   # Symlink latest build for this project and global latest report
@@ -219,11 +278,12 @@ EOF
   # Clean up temp files
   rm -f "$BUILDER_PROMPT_FILE" "$REVIEWER_PROMPT_FILE"
 
-  RESULTS+=("$PROJECT_ID: builder=$BUILDER_EXIT reviewer=$REVIEWER_EXIT")
+  RESULTS+=("$PROJECT_ID: builder=$BUILDER_EXIT reviewer=$REVIEWER_EXIT e2e=$E2E_STATUS")
 
   log "[$PROJECT_ID] Done!"
   log "  Builder:  $BUILD_DIR/builder-report.md"
   log "  Reviewer: $BUILD_DIR/reviewer-report.md"
+  log "  E2E:      $E2E_STATUS ($BUILD_DIR/e2e-results.txt)"
   log "  Meta:     $BUILD_DIR/run-meta.json"
 
 done

@@ -16,6 +16,27 @@ Build the project described in the user prompt. The skill files (available in th
 
 Anvil is already running and forking mainnet. Do NOT start your own Anvil instance. Use `http://127.0.0.1:8545` as the RPC URL.
 
+## Playwright E2E Tests
+
+In Phase 4, after `yarn next:build` passes, write Playwright end-to-end tests. See `testing/SKILL.md` → "Frontend E2E Testing with Playwright" for config templates, SE2 burner wallet auto-connect patterns, and selector strategy.
+
+Install in the Next.js package:
+```bash
+cd packages/nextjs && yarn add -D @playwright/test && npx playwright install chromium --with-deps
+```
+
+Minimum tests to write:
+1. Page loads without errors
+2. Burner wallet auto-connects (balance visible in header)
+3. At least one contract read value displays correctly
+4. At least one write transaction completes and UI updates
+
+Place config at `packages/nextjs/playwright.config.ts` and tests at `packages/nextjs/e2e/app.spec.ts`.
+
+Run: `cd packages/nextjs && npx playwright test`
+
+All Playwright tests must pass before moving to Phase 5.
+
 ## Reporting
 
 When you finish (or hit a fatal blocker), write a structured build report. For every gap, ambiguity, or issue you encountered in the skill files, classify it:

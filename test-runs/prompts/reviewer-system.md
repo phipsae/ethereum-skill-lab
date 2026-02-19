@@ -135,6 +135,37 @@ kill $DEV_PID 2>/dev/null || true
 
 Report: HTTP status code, whether HTML was returned, any critical errors found.
 
+### Playwright E2E Test Review
+
+Check if the builder wrote Playwright tests and assess their quality.
+
+**Check for tests:**
+```bash
+ls project/packages/nextjs/e2e/*.spec.ts 2>/dev/null
+```
+
+If tests exist, review quality:
+- Does at least one test exercise a contract write transaction (not just page load)?
+- Uses semantic selectors (`getByRole`, `getByText`) not CSS selectors?
+- No `waitForTimeout()` calls — uses assertion timeouts (`toBeVisible({ timeout })`) instead?
+- Waits for burner wallet auto-connect before interacting?
+
+**Run them** (dev server must be running):
+```bash
+cd project
+yarn start &
+DEV_PID=$!
+for i in $(seq 1 30); do
+  curl -s -o /dev/null http://localhost:3000 2>/dev/null && break
+  sleep 1
+done
+cd packages/nextjs && npx playwright test --reporter=list
+E2E_EXIT=$?
+kill $DEV_PID 2>/dev/null || true
+```
+
+Report pass/fail count. If tests don't exist, note as MINOR gap. If tests exist but fail, include the failure output.
+
 ### Report Template Addition
 
 Add this section to your review report after `### yarn next:build (frontend)`:
@@ -149,6 +180,7 @@ Add this section to your review report after `### yarn next:build (frontend)`:
 - **UI completeness:** X/Y contract functions have UI — list missing ones
 - **Transaction UX:** PASS/FAIL — details
 - **Dev server smoke test:** HTTP {code}, {pass/fail} — details
+- **Playwright E2E tests:** X passed, Y failed / NOT FOUND — details
 ```
 
 ## Important
