@@ -152,6 +152,7 @@ Add this section to your review report after `### npm run build (frontend)`:
 
 ## Important
 
+- The builder was working from a minimal user prompt (a short project idea + a few follow-up answers), NOT a detailed spec. The skills were supposed to guide all technical decisions. Judge whether the **skills** led the builder to good architecture, patterns, and testing — not whether the builder followed a spec.
 - Be specific: reference exact file paths and line numbers in the skill when recommending changes.
 - Distinguish between builder mistakes and genuine skill gaps.
 - If the builder improvised (went beyond the skill), note whether the skill should have covered that case.

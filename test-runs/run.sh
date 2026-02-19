@@ -77,14 +77,14 @@ for PROJECT_ID in "${PROJECT_IDS[@]}"; do
   log "Starting project: $PROJECT_ID"
   log "════════════════════════════════════════════════════════════════"
 
-  BUILD_DIR="$BASE_DIR/builds/$PROJECT_ID"
+  RUN_TS=$(date -u +"%Y%m%d-%H%M%S")
+  BUILD_DIR="$BASE_DIR/builds/$PROJECT_ID/$RUN_TS"
   PROJECT_DIR="$BUILD_DIR/project"
   BRIEF="$PROMPTS_DIR/projects/$PROJECT_ID.md"
 
-  # ─── Clean & prepare ─────────────────────────────────────────────────────────
-  log "Cleaning previous build..."
-  rm -rf "$BUILD_DIR"
+  # ─── Prepare build directory ────────────────────────────────────────────────
   mkdir -p "$PROJECT_DIR"
+  log "Build directory: $BUILD_DIR"
 
   RUN_START=$(ts)
 
@@ -206,7 +206,8 @@ EOF
       reviewer: { start: $reviewer_start, end: $reviewer_end, exit_code: $reviewer_exit }
     }' > "$BUILD_DIR/run-meta.json"
 
-  # Symlink latest report
+  # Symlink latest build for this project and global latest report
+  ln -sfn "$BUILD_DIR" "$BASE_DIR/builds/$PROJECT_ID/latest"
   ln -sf "$BUILD_DIR/reviewer-report.md" "$REPORTS_DIR/latest.md"
 
   # Clean up temp files
