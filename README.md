@@ -48,6 +48,5 @@ git add ethskills
 
 1. Run the pipeline on a project
 2. Read the builder + reviewer reports
-3. Branch in the submodule: `cd ethskills && git checkout -b improve/<topic>`
-4. Edit skill files, then push and open a PR on the ethskills repo
-5. Re-run the pipeline to verify
+3. Edit skill files on the current ethskills branch, commit and push
+4. Re-run the pipeline to verify

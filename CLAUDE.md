@@ -59,9 +59,8 @@ test-runs/
 
 1. Run the pipeline: `./test-runs/run.sh <project-id>`
 2. Read the reports in `test-runs/builds/<project-id>/`
-3. Create a branch in the ethskills submodule: `cd ethskills && git checkout -b improve/<topic>`
-4. Edit skill files on that branch
-5. Push the branch and open a PR on the main ethskills repo
+3. Edit skill files on the current ethskills branch
+4. Commit and push changes
 
 ## Submodule Management
 

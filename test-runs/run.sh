@@ -226,9 +226,13 @@ EOF
         E2E_STATUS="FAIL"
       fi
 
-      # Parse pass/fail counts from Playwright output
-      E2E_PASS=$(grep -c "✓\|✔\| passed" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || echo "0")
-      E2E_FAIL=$(grep -c "✗\|✘\| failed" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || echo "0")
+      # Parse pass/fail counts from Playwright summary line (e.g. "  6 passed (10.8s)")
+      # Don't use grep -c || echo "0" — grep -c prints "0" AND exits 1 on no match,
+      # so || echo "0" appends a second "0", breaking jq --argjson.
+      E2E_PASS=$(grep -c "✓\|✔" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || true)
+      E2E_PASS=${E2E_PASS:-0}
+      E2E_FAIL=$(grep -c "✗\|✘" "$BUILD_DIR/e2e-results.txt" 2>/dev/null || true)
+      E2E_FAIL=${E2E_FAIL:-0}
     else
       E2E_STATUS="SERVER_FAILED"
       echo "Dev server failed to start within 30s" > "$BUILD_DIR/e2e-results.txt"
