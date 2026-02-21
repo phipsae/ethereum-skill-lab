@@ -15,8 +15,6 @@ ANVIL_PID=""
 FORK_RPC="${FORK_RPC:-https://mainnet.rpc.buidlguidl.com}"
 ANVIL_PORT=8545
 MODEL="${MODEL:-sonnet}"
-BUILDER_MAX_BUDGET="${BUILDER_MAX_BUDGET:-15.00}"
-REVIEWER_MAX_BUDGET="${REVIEWER_MAX_BUDGET:-5.00}"
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 log()  { printf "\033[1;34m[pipeline]\033[0m %s\n" "$*"; }
@@ -134,7 +132,6 @@ EOF
   (cd "$PROJECT_DIR" && claude -p "$BUILDER_PROMPT" \
     --append-system-prompt "$BUILDER_SYSTEM" \
     --model "$MODEL" \
-    --max-budget-usd "$BUILDER_MAX_BUDGET" \
     --add-dir "$SKILL_DIR" \
     --dangerously-skip-permissions \
     --output-format text) \
@@ -166,7 +163,6 @@ EOF
   (cd "$BUILD_DIR" && claude -p "$REVIEWER_PROMPT" \
     --append-system-prompt "$REVIEWER_SYSTEM" \
     --model "$MODEL" \
-    --max-budget-usd "$REVIEWER_MAX_BUDGET" \
     --add-dir "$SKILL_DIR" \
     --add-dir "$BUILD_DIR" \
     --dangerously-skip-permissions \
